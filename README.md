@@ -40,3 +40,28 @@
 
 5. 데이터 배치 자동화
    1. 매년 1월 2일 01:00 KST에 전년도,금년도 데이터를 자동 동기화
+
+
+### 외부 API 분석
+1. 국가목록 반환 데이터
+   1. countryCode : 국가 코드(String)
+   2. name : 국가명(String)
+
+2. 특정 연도 공휴일 반환 데이터
+   1. date : 날짜(String , YYYY-MM-DD)
+   2. localName : 현지이름(String)
+   3. name : 영문이름(String)
+   4. fixed : 날짜가 고정인지(Boolean)
+   5. global(Boolean)
+       - true : 전국단위
+       - false : 지역단위
+   6. countries(Nullable, String List)
+      - global이 false인 경우 지역을 표기
+   7. launchYear : 도입된 해(Nullable, Integer)
+   8. types(Enum List)
+      - Public : 법정 공휴일
+      - Bank : 은행 휴일
+      - School : 학교에서만 쉬는 날
+      - Authorities : 공공기간만 쉬는 날
+      - Optional : 선택적 휴일
+      - Observance : 기념일이지만 법적 공휴일 아님
