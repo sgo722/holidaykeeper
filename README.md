@@ -65,3 +65,8 @@
       - Authorities : 공공기간만 쉬는 날
       - Optional : 선택적 휴일
       - Observance : 기념일이지만 법적 공휴일 아님
+
+
+## 리팩토링 대상 정리
+[ ] restClient 에러 핸들링  
+[ ] Country / Holiday 패키지 분리하기  
