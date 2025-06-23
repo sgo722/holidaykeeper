@@ -54,6 +54,34 @@ class HolidayQueryRepositoryTest {
     }
 
     @Test
+    @DisplayName("KR 나라코드로 조회하면 JP 나라 공휴일은 조회되지 않는다")
+    void searchHolidaysByYearAndCountryCode_excludesOtherCountries() {
+        // given
+        Country kr = createCountry("KR", "Korea");
+        Region seoul = createRegion("KR-SEOUL", kr);
+        Holiday krHoliday = createHoliday("개천절", LocalDate.of(2024, 10, 3), kr, true, HolidayType.PUBLIC);
+        krHoliday.addRegion(seoul);
+
+        Country jp = createCountry("JP", "Japan");
+        Region osaka = createRegion("JP-OSAKA", jp);
+        Holiday jpHoliday = createHoliday("신년", LocalDate.of(2024, 10, 3), jp, true, HolidayType.PUBLIC);
+        jpHoliday.addRegion(osaka);
+
+        HolidaySearchCondition condition = new HolidaySearchCondition("KR", 2024, 2024, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        List<Holiday> result = holidayQueryRepository.search(condition, pageable).getContent();
+
+        // then
+        assertThat(result)
+                .hasSize(1)
+                .extracting(Holiday::getName)
+                .containsExactly("개천절")
+                .doesNotContain("신년");
+    }
+
+    @Test
     @DisplayName("글로벌 여부 조건으로 공휴일을 필터링할 수 있다")
     void searchHolidaysByGlobalCondition() {
         // given
@@ -88,6 +116,67 @@ class HolidayQueryRepositoryTest {
 
         // then
         assertThat(result).hasSize(1).extracting(Holiday::getName).containsExactly("개천절");
+    }
+
+    @Test
+    @DisplayName("연도별로 공휴일을 조회할 수 있다")
+    void searchByYear() {
+        // given
+        Country kr = createCountry("KR", "Korea");
+        createHoliday("2023 개천절", LocalDate.of(2023, 10, 3), kr, true, HolidayType.PUBLIC);
+        createHoliday("2024 개천절", LocalDate.of(2024, 10, 3), kr, true, HolidayType.PUBLIC);
+        createHoliday("2025 개천절", LocalDate.of(2025, 10, 3), kr, true, HolidayType.PUBLIC);
+
+        HolidaySearchCondition condition = new HolidaySearchCondition("KR", 2024, 2024, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        List<Holiday> result = holidayQueryRepository.search(condition, pageable).getContent();
+
+        // then
+        assertThat(result).hasSize(1).extracting(Holiday::getName).containsExactly("2024 개천절");
+    }
+
+    @Test
+    @DisplayName("국가별로 공휴일을 조회할 수 있다")
+    void searchByCountry() {
+        // given
+        Country kr = createCountry("KR", "Korea");
+        Country jp = createCountry("JP", "Japan");
+        createHoliday("한국 공휴일", LocalDate.of(2024, 3, 1), kr, true, HolidayType.PUBLIC);
+        createHoliday("일본 공휴일", LocalDate.of(2024, 3, 1), jp, true, HolidayType.PUBLIC);
+
+        HolidaySearchCondition condition = new HolidaySearchCondition("KR", 2024, 2024, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        List<Holiday> result = holidayQueryRepository.search(condition, pageable).getContent();
+
+        // then
+        assertThat(result).hasSize(1).extracting(Holiday::getName).containsExactly("한국 공휴일");
+    }
+
+    @Test
+    @DisplayName("기간 조건(from, to)으로 공휴일을 조회할 수 있다")
+    void searchByPeriod() {
+        // given
+        Country kr = createCountry("KR", "Korea");
+        createHoliday("2024년 1월", LocalDate.of(2024, 1, 1), kr, true, HolidayType.PUBLIC);
+        createHoliday("2024년 6월", LocalDate.of(2024, 6, 6), kr, true, HolidayType.PUBLIC);
+        createHoliday("2024년 12월", LocalDate.of(2024, 12, 25), kr, true, HolidayType.PUBLIC);
+        createHoliday("2027년 12월", LocalDate.of(2027, 12, 25), kr, true, HolidayType.PUBLIC);
+        createHoliday("2030년 12월", LocalDate.of(2030, 12, 25), kr, true, HolidayType.PUBLIC);
+
+        HolidaySearchCondition condition = new HolidaySearchCondition("KR", 2024, 2024, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        List<Holiday> result = holidayQueryRepository.search(condition, pageable).getContent();
+
+        // then
+        assertThat(result).hasSize(3)
+                .extracting(Holiday::getName)
+                .containsExactlyInAnyOrder("2024년 1월", "2024년 6월", "2024년 12월");
     }
 
     private Holiday createHoliday(String name, LocalDate date, Country country, boolean isGlobal, HolidayType... types) {
