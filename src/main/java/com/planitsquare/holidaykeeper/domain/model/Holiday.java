@@ -65,6 +65,10 @@ public class Holiday {
         regions.add(new HolidayRegion(this, region));
     }
 
+    public String getCountryCode(){
+        return country.getCode();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
