@@ -1,5 +1,6 @@
 package com.planitsquare.holidaykeeper.global.advice;
 
+import com.planitsquare.holidaykeeper.global.exception.NagerApiException;
 import com.planitsquare.holidaykeeper.global.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,12 @@ public class CustomExceptionAdvice {
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(NagerApiException.class)
+    public ResponseEntity<ErrorResponse> handleNagerApiException(NagerApiException ex) {
+        ErrorResponse error = new ErrorResponse("외부 공휴일 API 오류: " + ex.getMessage(), 502);
+        return ResponseEntity.status(502).body(error);
     }
 
     @ExceptionHandler(Exception.class)
