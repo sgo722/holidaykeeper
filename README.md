@@ -72,4 +72,5 @@
 [x] Country / Holiday 패키지 분리하기  
 [ ] 기간별 조회할 떄 단위가 연도가 아니라 날짜별로 조회 가능하도록 구현하기
 [x] 전역 에러 핸들링 구현하기
-[ ] Request 데이터 검증하기
+[x] Controller Request 데이터 검증하기
+[ ] Service Request 데이터 검증하기 

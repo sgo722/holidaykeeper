@@ -4,6 +4,7 @@ import com.planitsquare.holidaykeeper.global.exception.NagerApiException;
 import com.planitsquare.holidaykeeper.global.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +21,12 @@ public class CustomExceptionAdvice {
     public ResponseEntity<ErrorResponse> handleNagerApiException(NagerApiException ex) {
         ErrorResponse error = new ErrorResponse("외부 공휴일 API 오류: " + ex.getMessage(), 502);
         return ResponseEntity.status(502).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+        return ResponseEntity.badRequest().body(new ErrorResponse(message, 400));
     }
 
     @ExceptionHandler(Exception.class)

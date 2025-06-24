@@ -2,16 +2,17 @@ package com.planitsquare.holidaykeeper.domain.holiday.presentation.request;
 
 import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
 import com.planitsquare.holidaykeeper.domain.holiday.business.request.HolidaySearchCondition;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.time.Year;
 
 public record HolidaySearchRequest(
-        String country,           // ISO 코드 예: "KR"
-        Integer fromYear,
-        Integer toYear,             // 연도: 2024
-        Boolean global,           // 글로벌 공휴일 여부
-        HolidayType type          // Public, School, Optional 등
-) {
+        String country,
+        @Min(1900) Integer fromYear,
+        @Max(2100) Integer toYear,
+        Boolean global,
+        HolidayType type) {
 
     public HolidaySearchCondition toCondition() {
         return new HolidaySearchCondition(
