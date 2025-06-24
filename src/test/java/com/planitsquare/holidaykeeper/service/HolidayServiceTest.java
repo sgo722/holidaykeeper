@@ -4,12 +4,14 @@ import com.planitsquare.holidaykeeper.domain.model.*;
 import com.planitsquare.holidaykeeper.domain.repository.*;
 import com.planitsquare.holidaykeeper.infrastructure.api.NagerApiClient;
 import com.planitsquare.holidaykeeper.domain.dto.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.service.request.HolidaySearchCondition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -46,6 +48,159 @@ class HolidayServiceTest {
     @BeforeEach
     void setUp() {
         country = countryRepository.save(new Country("KR", "대한민국"));
+    }
+
+    @Test
+    @DisplayName("국가코드로 공휴일을 조회하면 해당 국가의 공휴일만 반환된다")
+    void searchHolidaysByCountryCode() {
+        // given
+        Country us = countryRepository.save(new Country("US", "미국"));
+        County seoul = countyRepository.save(new County("11", country));
+        County la = countyRepository.save(new County("LA", us));
+
+        Holiday kr2024 = Holiday.of(
+                country,
+                LocalDate.of(2024, 3, 1),
+                "삼일절",
+                "Independence Movement Day",
+                true,
+                true,
+                1946,
+                Set.of(HolidayType.PUBLIC),
+                List.of(seoul)
+        );
+        Holiday us2024 = Holiday.of(
+                us,
+                LocalDate.of(2024, 7, 4),
+                "Independence Day",
+                "Independence Day",
+                true,
+                true,
+                1776,
+                Set.of(HolidayType.PUBLIC),
+                List.of(la)
+        );
+        holidayRepository.saveAll(List.of(kr2024, us2024));
+
+        // when
+        var cond = new HolidaySearchCondition("KR", null, null, null, null);
+        var result = holidayService.search(cond, Pageable.unpaged());
+
+        // then
+        assertThat(result.getContent()).extracting("countryCode").containsOnly("KR");
+    }
+
+    @Test
+    @DisplayName("연도 범위로 공휴일을 조회하면 해당 연도의 공휴일만 반환된다")
+    void searchHolidaysByYearRange() {
+        // given
+        County seoul = countyRepository.save(new County("11", country));
+        Holiday kr2024 = Holiday.of(
+                country,
+                LocalDate.of(2024, 3, 1),
+                "삼일절",
+                "Independence Movement Day",
+                true,
+                true,
+                1946,
+                Set.of(HolidayType.PUBLIC),
+                List.of(seoul)
+        );
+        Holiday kr2025School = Holiday.of(
+                country,
+                LocalDate.of(2025, 2, 10),
+                "개학일",
+                "School Opening Day",
+                true,
+                false,
+                2025,
+                Set.of(HolidayType.SCHOOL),
+                List.of(seoul)
+        );
+        holidayRepository.saveAll(List.of(kr2024, kr2025School));
+
+        // when
+        var cond = new HolidaySearchCondition("KR", 2025, 2025, null, null);
+        var result = holidayService.search(cond, Pageable.unpaged());
+
+        // then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).name()).isEqualTo("School Opening Day");
+    }
+
+    @Test
+    @DisplayName("글로벌 여부로 공휴일을 조회하면 global=true인 공휴일만 반환된다")
+    void searchHolidaysByGlobalFlag() {
+        // given
+        County seoul = countyRepository.save(new County("11", country));
+        Holiday globalHoliday = Holiday.of(
+                country,
+                LocalDate.of(2024, 3, 1),
+                "삼일절",
+                "Independence Movement Day",
+                true,
+                true,
+                1946,
+                Set.of(HolidayType.PUBLIC),
+                List.of(seoul)
+        );
+        Holiday localHoliday = Holiday.of(
+                country,
+                LocalDate.of(2025, 2, 10),
+                "개학일",
+                "School Opening Day",
+                true,
+                false,
+                2025,
+                Set.of(HolidayType.SCHOOL),
+                List.of(seoul)
+        );
+        holidayRepository.saveAll(List.of(globalHoliday, localHoliday));
+
+        // when
+        var cond = new HolidaySearchCondition("KR", null, null, true, null);
+        var result = holidayService.search(cond, Pageable.unpaged());
+
+        // then
+        assertThat(result.getContent()).allMatch(r -> r.global());
+    }
+
+    @Test
+    @DisplayName("타입으로 공휴일을 조회하면 해당 타입의 공휴일만 반환된다")
+    void searchHolidaysByType() {
+        // given
+        County seoul = countyRepository.save(new County("11", country));
+        Holiday publicHoliday = Holiday.of(
+                country,
+                LocalDate.of(2024, 3, 1),
+                "삼일절",
+                "Independence Movement Day",
+                true,
+                true,
+                1946,
+                Set.of(HolidayType.PUBLIC),
+                List.of(seoul)
+        );
+        Holiday schoolHoliday = Holiday.of(
+                country,
+                LocalDate.of(2025, 2, 10),
+                "개학일",
+                "School Opening Day",
+                true,
+                false,
+                2025,
+                Set.of(HolidayType.SCHOOL),
+                List.of(seoul)
+        );
+        holidayRepository.saveAll(List.of(publicHoliday, schoolHoliday));
+
+        // when
+        var cond = new HolidaySearchCondition("KR", null, null, null, HolidayType.SCHOOL);
+        var result = holidayService.search(cond, Pageable.unpaged());
+
+        // then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).types()).contains(HolidayType.SCHOOL);
     }
 
     @Test
