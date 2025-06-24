@@ -43,11 +43,11 @@ class HolidayServiceTest {
     @MockBean
     private NagerApiClient nagerApiClient;
 
-    private Country country;
+    private Country kr;
 
     @BeforeEach
     void setUp() {
-        country = countryRepository.save(new Country("KR", "대한민국"));
+        kr = countryRepository.save(new Country("KR", "대한민국"));
     }
 
     @Test
@@ -55,11 +55,11 @@ class HolidayServiceTest {
     void searchHolidaysByCountryCode() {
         // given
         Country us = countryRepository.save(new Country("US", "미국"));
-        County seoul = countyRepository.save(new County("11", country));
+        County seoul = countyRepository.save(new County("11", kr));
         County la = countyRepository.save(new County("LA", us));
 
         Holiday kr2024 = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2024, 3, 1),
                 "삼일절",
                 "Independence Movement Day",
@@ -94,9 +94,9 @@ class HolidayServiceTest {
     @DisplayName("연도 범위로 공휴일을 조회하면 해당 연도의 공휴일만 반환된다")
     void searchHolidaysByYearRange() {
         // given
-        County seoul = countyRepository.save(new County("11", country));
+        County seoul = countyRepository.save(new County("11", kr));
         Holiday kr2024 = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2024, 3, 1),
                 "삼일절",
                 "Independence Movement Day",
@@ -107,7 +107,7 @@ class HolidayServiceTest {
                 List.of(seoul)
         );
         Holiday kr2025School = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2025, 2, 10),
                 "개학일",
                 "School Opening Day",
@@ -132,9 +132,9 @@ class HolidayServiceTest {
     @DisplayName("글로벌 여부로 공휴일을 조회하면 global=true인 공휴일만 반환된다")
     void searchHolidaysByGlobalFlag() {
         // given
-        County seoul = countyRepository.save(new County("11", country));
+        County seoul = countyRepository.save(new County("11", kr));
         Holiday globalHoliday = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2024, 3, 1),
                 "삼일절",
                 "Independence Movement Day",
@@ -145,7 +145,7 @@ class HolidayServiceTest {
                 List.of(seoul)
         );
         Holiday localHoliday = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2025, 2, 10),
                 "개학일",
                 "School Opening Day",
@@ -169,9 +169,9 @@ class HolidayServiceTest {
     @DisplayName("타입으로 공휴일을 조회하면 해당 타입의 공휴일만 반환된다")
     void searchHolidaysByType() {
         // given
-        County seoul = countyRepository.save(new County("11", country));
+        County seoul = countyRepository.save(new County("11", kr));
         Holiday publicHoliday = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2024, 3, 1),
                 "삼일절",
                 "Independence Movement Day",
@@ -182,7 +182,7 @@ class HolidayServiceTest {
                 List.of(seoul)
         );
         Holiday schoolHoliday = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2025, 2, 10),
                 "개학일",
                 "School Opening Day",
@@ -223,7 +223,7 @@ class HolidayServiceTest {
         holidayService.upsertHolidays(2025, "KR");
 
         // then
-        List<Holiday> holidays = holidayRepository.findByYearAndCountry(2025, country);
+        List<Holiday> holidays = holidayRepository.findByYearAndCountry(2025, kr);
         assertThat(holidays).hasSize(1);
         Holiday holiday = holidays.get(0);
         assertThat(holiday.getName()).isEqualTo("New Year's Day");
@@ -237,7 +237,7 @@ class HolidayServiceTest {
     void updateExistingHoliday() {
         // given
         Holiday holiday = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2025, 1, 1),
                 "구신정",
                 "Old New Year",
@@ -265,7 +265,7 @@ class HolidayServiceTest {
         holidayService.upsertHolidays(2025, "KR");
 
         // then
-        List<Holiday> holidays = holidayRepository.findByYearAndCountry(2025, country);
+        List<Holiday> holidays = holidayRepository.findByYearAndCountry(2025, kr);
         assertThat(holidays).hasSize(1);
         Holiday updated = holidays.get(0);
         assertThat(updated.getName()).isEqualTo("New Year's Day");
@@ -277,7 +277,7 @@ class HolidayServiceTest {
     void markHolidayAsDeleteCandidate() {
         // given
         Holiday holiday = Holiday.of(
-                country,
+                kr,
                 LocalDate.of(2025, 1, 1),
                 "신정",
                 "New Year's Day",
@@ -305,5 +305,40 @@ class HolidayServiceTest {
     void throwExceptionForInvalidCountryCode() {
         assertThatThrownBy(() -> holidayService.upsertHolidays(2025, "XX"))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("특정 연도·국가의 공휴일 상태를 DELETE로 변경한다")
+    void markHolidaysAsDeletedByYearAndCountry() {
+        // given
+        County seoul = countyRepository.save(new County("11", kr));
+        Holiday h1 = holidayRepository.save(Holiday.of(
+                kr,
+                LocalDate.of(2025, 1, 1),
+                "신정",
+                "New Year's Day",
+                true,
+                true,
+                1949,
+                Set.of(HolidayType.PUBLIC),
+                List.of(seoul)
+        ));
+        Holiday h2 = holidayRepository.save(Holiday.of(
+                kr,
+                LocalDate.of(2025, 3, 1),
+                "삼일절",
+                "Independence Movement Day",
+                true,
+                true,
+                1946,
+                Set.of(HolidayType.PUBLIC),
+                List.of(seoul)
+        ));
+        // when
+        int updated = holidayService.markHolidaysAsDeletedByYearAndCountry(2025, "KR");
+        // then
+        assertThat(updated).isEqualTo(2);
+        List<Holiday> holidays = holidayRepository.findByYearAndCountry(2025, kr);
+        assertThat(holidays).allMatch(h -> h.getHolidayStatus() == HolidayStatus.DELETE);
     }
 }
