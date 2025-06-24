@@ -20,8 +20,8 @@ public class HolidayController {
     private final HolidayService holidayService;
 
     @GetMapping
-    public Page<HolidayResponse> searchHolidays(HolidaySearchRequest holidaySearchRequest, Pageable pageable) {
-        return holidayService.search(holidaySearchRequest.toCondition(), pageable);
+    public ResponseEntity<Page<HolidayResponse>> searchHolidays(HolidaySearchRequest holidaySearchRequest, Pageable pageable) {
+        return ResponseEntity.ok(holidayService.search(holidaySearchRequest.toCondition(), pageable));
     }
 
     @PostMapping
