@@ -69,7 +69,7 @@
 
 ## 리팩토링 대상 정리
 [ ] restClient 에러 핸들링  
-[ ] Country / Holiday 패키지 분리하기  
+[x] Country / Holiday 패키지 분리하기  
 [ ] 기간별 조회할 떄 단위가 연도가 아니라 날짜별로 조회 가능하도록 구현하기
 [x] 전역 에러 핸들링 구현하기
 [ ] Request 데이터 검증하기

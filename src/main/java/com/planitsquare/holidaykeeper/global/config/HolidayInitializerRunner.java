@@ -1,15 +1,15 @@
 package com.planitsquare.holidaykeeper.global.config;
 
-import com.planitsquare.holidaykeeper.domain.dto.CountryResponse;
-import com.planitsquare.holidaykeeper.domain.dto.PublicHolidayResponse;
-import com.planitsquare.holidaykeeper.domain.model.County;
-import com.planitsquare.holidaykeeper.domain.model.Country;
-import com.planitsquare.holidaykeeper.domain.model.Holiday;
-import com.planitsquare.holidaykeeper.domain.model.HolidayType;
-import com.planitsquare.holidaykeeper.domain.repository.CountryRepository;
-import com.planitsquare.holidaykeeper.domain.repository.HolidayRepository;
-import com.planitsquare.holidaykeeper.domain.repository.CountyRepository;
-import com.planitsquare.holidaykeeper.infrastructure.api.NagerApiClient;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.entity.County;
+import com.planitsquare.holidaykeeper.domain.country.entity.Country;
+import com.planitsquare.holidaykeeper.domain.holiday.entity.Holiday;
+import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
+import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.HolidayRepository;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.CountyRepository;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.NagerApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
