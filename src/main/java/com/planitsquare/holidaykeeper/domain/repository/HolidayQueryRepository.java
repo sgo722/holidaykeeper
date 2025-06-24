@@ -31,13 +31,13 @@ public class HolidayQueryRepository extends QuerydslRepositorySupport {
 
     public Page<Holiday> search(HolidaySearchCondition condition, Pageable pageable) {
         QHoliday holiday = QHoliday.holiday;
-        QHolidayRegion holidayRegion = QHolidayRegion.holidayRegion;
-        QRegion region = QRegion.region;
+        QHolidayCounty holidayCounty = QHolidayCounty.holidayCounty;
+        QCounty county = QCounty.county;
 
         JPQLQuery<Holiday> query = queryFactory
                 .selectFrom(holiday)
-                .leftJoin(holiday.regions, holidayRegion).fetchJoin()
-                .leftJoin(holidayRegion.region, region).fetchJoin()
+                .leftJoin(holiday.counties, holidayCounty).fetchJoin()
+                .leftJoin(holidayCounty.county, county).fetchJoin()
                 .where(
                         eqCountryCode(condition.countryCode()),
                         betweenYear(condition.fromYear(), condition.toYear()),

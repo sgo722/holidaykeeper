@@ -56,9 +56,10 @@ public class HolidayService {
                     .findFirst();
 
             List<County> counties = Optional.ofNullable(newData.countyCodes())
-                    .orElse(List.of()).stream()
-                    .map(countyRepository::findOrCreate)
-                    .collect(Collectors.toList());
+                .orElse(List.of())
+                .stream()
+                .map(code -> findOrCreateCounty(code, findCountry))
+                .collect(Collectors.toList());
 
             Set<HolidayType> updateTypes = newData.types().stream()
                 .map(HolidayType::from)
@@ -101,5 +102,10 @@ public class HolidayService {
                 deleteCandidateRepository.save(DeleteCandidate.from(oldData));
             }
         }
+    }
+
+    private County findOrCreateCounty(String code, Country country) {
+        return countyRepository.findByCode(code)
+                .orElseGet(() -> countyRepository.save(new County(code, country)));
     }
 }

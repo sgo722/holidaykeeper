@@ -10,6 +10,4 @@ public interface CountyRepository extends JpaRepository<County, Long> {
     List<County> findAllByCodeIn(List<String> counties);
 
     Optional<County> findByCode(String code);
-
-    County findOrCreate(String countyCode);
 }

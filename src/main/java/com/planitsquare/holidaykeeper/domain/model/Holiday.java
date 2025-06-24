@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static jakarta.persistence.CascadeType.ALL;
@@ -40,7 +41,7 @@ public class Holiday extends BaseEntity {
     private boolean global;
 
     @OneToMany(mappedBy = "holiday", cascade = ALL, orphanRemoval = true)
-    private List<HolidayCounty> counties;
+    private List<HolidayCounty> counties = new ArrayList<>();
 
     private Integer launchYear;
 
@@ -48,7 +49,7 @@ public class Holiday extends BaseEntity {
     @CollectionTable(name = "holiday_type", joinColumns = @JoinColumn(name = "holiday_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private Set<HolidayType> types;
+    private Set<HolidayType> types = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private HolidayStatus holidayStatus;
@@ -60,10 +61,9 @@ public class Holiday extends BaseEntity {
         this.localName = localName;
         this.name = name;
         this.fixed = fixed;
-        this.counties = new ArrayList<>();
         this.global = global;
         this.launchYear = launchYear;
-        this.types = types;
+        this.types = new HashSet<>(types);
         this.holidayStatus = HolidayStatus.ACTIVE;
     }
 
@@ -106,7 +106,7 @@ public class Holiday extends BaseEntity {
             changed = true;
         }
         if (!Objects.equals(this.types, types)) {
-            this.types = types;
+            this.types = new HashSet<>(types);
             changed = true;
         }
         Set<String> newCountyCodes = counties.stream().map(County::getCode).collect(Collectors.toSet());
