@@ -1,5 +1,6 @@
 package com.planitsquare.holidaykeeper.domain.model;
 
+import com.planitsquare.holidaykeeper.global.core.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Country {
+public class Country extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -2,13 +2,13 @@ package com.planitsquare.holidaykeeper.global.config;
 
 import com.planitsquare.holidaykeeper.domain.dto.CountryResponse;
 import com.planitsquare.holidaykeeper.domain.dto.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.domain.model.County;
 import com.planitsquare.holidaykeeper.domain.model.Country;
 import com.planitsquare.holidaykeeper.domain.model.Holiday;
 import com.planitsquare.holidaykeeper.domain.model.HolidayType;
-import com.planitsquare.holidaykeeper.domain.model.Region;
 import com.planitsquare.holidaykeeper.domain.repository.CountryRepository;
 import com.planitsquare.holidaykeeper.domain.repository.HolidayRepository;
-import com.planitsquare.holidaykeeper.domain.repository.RegionRepository;
+import com.planitsquare.holidaykeeper.domain.repository.CountyRepository;
 import com.planitsquare.holidaykeeper.infrastructure.api.NagerApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class HolidayInitializerRunner implements ApplicationRunner {
     private final CountryRepository countryRepository;
     private final NagerApiClient nagerApiClient;
     private final HolidayRepository holidayRepository;
-    private final RegionRepository regionRepository;
+    private final CountyRepository countyRepository;
 
     @Override
     public void run(ApplicationArguments args){
@@ -102,13 +102,13 @@ public class HolidayInitializerRunner implements ApplicationRunner {
                             .launchYear(response.launchYear())
                             .build();
 
-                    if (!response.global() && response.counties() != null) {
-                        List<Region> regions = response.counties().stream()
-                                .map(code -> regionRepository.findByCode(code)
-                                        .orElseGet(() -> regionRepository.save(
-                                                new Region(code, country))))
+                    if (!response.global() && response.countyCodes() != null) {
+                        List<County> counties = response.countyCodes().stream()
+                                .map(code -> countyRepository.findByCode(code)
+                                        .orElseGet(() -> countyRepository.save(
+                                                new County(code, country))))
                                 .toList();
-                        regions.forEach(holiday::addRegion);
+                        counties.forEach(holiday::addCounty);
                     }
 
                     holidayRepository.save(holiday);

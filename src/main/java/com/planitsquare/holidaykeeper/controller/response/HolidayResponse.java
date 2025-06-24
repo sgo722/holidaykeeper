@@ -27,8 +27,8 @@ public record HolidayResponse(
             holiday.isGlobal(),
             holiday.getLaunchYear(),
             List.copyOf(holiday.getTypes()),
-            holiday.getRegions().stream()
-                    .map(region -> region.getRegion().getCode())
+            holiday.getCounties().stream()
+                    .map(region -> region.getCounty().getCode())
                     .toList()
         );
     }

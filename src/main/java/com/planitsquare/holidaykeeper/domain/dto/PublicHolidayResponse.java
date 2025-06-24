@@ -9,7 +9,7 @@ public record PublicHolidayResponse(
         String name,
         boolean fixed,
         boolean global,
-        List<String> counties,
+        List<String> countyCodes,
         Integer launchYear,
         List<String> types
 ) {}

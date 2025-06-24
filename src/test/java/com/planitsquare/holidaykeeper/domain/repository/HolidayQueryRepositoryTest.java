@@ -1,12 +1,11 @@
 package com.planitsquare.holidaykeeper.domain.repository;
 
+import com.planitsquare.holidaykeeper.domain.model.County;
 import com.planitsquare.holidaykeeper.domain.model.Country;
 import com.planitsquare.holidaykeeper.domain.model.Holiday;
 import com.planitsquare.holidaykeeper.domain.model.HolidayType;
-import com.planitsquare.holidaykeeper.domain.model.Region;
 import com.planitsquare.holidaykeeper.global.config.QuerydslConfig;
 import com.planitsquare.holidaykeeper.service.request.HolidaySearchCondition;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +31,16 @@ class HolidayQueryRepositoryTest {
     @Autowired
     private CountryRepository countryRepository;
     @Autowired
-    private RegionRepository regionRepository;
+    private CountyRepository countyRepository;
 
     @Test
     @DisplayName("날짜와 나라코드로 공휴일을 조회한다")
     void searchHolidaysByYearAndCountryCode() {
         // given
         Country kr = createCountry("KR", "Korea");
-        Region seoul = createRegion("SEOUL", kr);
+        County seoul = createRegion("SEOUL", kr);
         Holiday holiday = createHoliday("개천절", LocalDate.of(2024, 10, 3), kr, true, HolidayType.PUBLIC);
-        holiday.addRegion(seoul);
+        holiday.addCounty(seoul);
 
         HolidaySearchCondition condition = new HolidaySearchCondition("KR", 2024, 2024, null, null);
         Pageable pageable = PageRequest.of(0, 10);
@@ -58,14 +57,14 @@ class HolidayQueryRepositoryTest {
     void searchHolidaysByYearAndCountryCode_excludesOtherCountries() {
         // given
         Country kr = createCountry("KR", "Korea");
-        Region seoul = createRegion("KR-SEOUL", kr);
+        County seoul = createRegion("KR-SEOUL", kr);
         Holiday krHoliday = createHoliday("개천절", LocalDate.of(2024, 10, 3), kr, true, HolidayType.PUBLIC);
-        krHoliday.addRegion(seoul);
+        krHoliday.addCounty(seoul);
 
         Country jp = createCountry("JP", "Japan");
-        Region osaka = createRegion("JP-OSAKA", jp);
+        County osaka = createRegion("JP-OSAKA", jp);
         Holiday jpHoliday = createHoliday("신년", LocalDate.of(2024, 10, 3), jp, true, HolidayType.PUBLIC);
-        jpHoliday.addRegion(osaka);
+        jpHoliday.addCounty(osaka);
 
         HolidaySearchCondition condition = new HolidaySearchCondition("KR", 2024, 2024, null, null);
         Pageable pageable = PageRequest.of(0, 10);
@@ -194,7 +193,7 @@ class HolidayQueryRepositoryTest {
         return countryRepository.save(new Country(code, name));
     }
 
-    private Region createRegion(String code, Country country) {
-        return regionRepository.save(new Region(code, country));
+    private County createRegion(String code, Country country) {
+        return countyRepository.save(new County(code, country));
     }
 }

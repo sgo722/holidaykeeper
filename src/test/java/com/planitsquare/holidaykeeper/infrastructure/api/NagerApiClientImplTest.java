@@ -120,7 +120,7 @@ class NagerApiClientImplTest {
                     "countryCode": "KR",
                     "fixed": false,
                     "global": true,
-                    "counties": null,
+                    "county": null,
                     "launchYear": null,
                     "types": ["Public"]
                   }

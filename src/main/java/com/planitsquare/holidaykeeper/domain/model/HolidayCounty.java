@@ -1,5 +1,6 @@
 package com.planitsquare.holidaykeeper.domain.model;
 
+import com.planitsquare.holidaykeeper.global.core.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
         name = "holiday_region",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"holiday_id", "region_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"holiday_id", "counties_id"})
 )
 @NoArgsConstructor
 @Getter
-public class HolidayRegion {
+public class HolidayCounty extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +24,11 @@ public class HolidayRegion {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "region_id", nullable = false)
-    private Region region;
+    @JoinColumn(name = "counties_id", nullable = false)
+    private County county;
 
-    public HolidayRegion(Holiday holiday, Region region) {
+    public HolidayCounty(Holiday holiday, County county) {
         this.holiday = holiday;
-        this.region = region;
+        this.county = county;
     }
 }
