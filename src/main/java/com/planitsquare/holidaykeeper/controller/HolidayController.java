@@ -2,6 +2,7 @@ package com.planitsquare.holidaykeeper.controller;
 
 import com.planitsquare.holidaykeeper.controller.request.HolidaySearchRequest;
 import com.planitsquare.holidaykeeper.controller.request.HolidayUpsertRequest;
+import com.planitsquare.holidaykeeper.controller.request.HolidayDeleteRequest;
 import com.planitsquare.holidaykeeper.controller.response.HolidayResponse;
 import com.planitsquare.holidaykeeper.service.HolidayService;
 import com.planitsquare.holidaykeeper.service.request.HolidayUpsertServiceRequest;
@@ -28,5 +29,13 @@ public class HolidayController {
         HolidayUpsertServiceRequest serviceRequest = holidayUpsertRequest.toService();
         holidayService.upsertHolidays(serviceRequest.year(), serviceRequest.countryCode());
         return ResponseEntity.ok("Upsert 완료");
+    }
+
+    @PatchMapping("/delete")
+    public ResponseEntity<String> markHolidaysAsDeleted(
+            @RequestBody HolidayDeleteRequest request
+    ) {
+        int updated = holidayService.markHolidaysAsDeletedByYearAndCountry(request.year(), request.countryCode());
+        return ResponseEntity.ok(updated + "건 상태값 DELETE로 변경 완료");
     }
 }

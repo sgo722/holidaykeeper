@@ -142,4 +142,8 @@ public class Holiday extends BaseEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    public void markAsDeleted() {
+        this.holidayStatus = HolidayStatus.DELETE;
+    }
 }

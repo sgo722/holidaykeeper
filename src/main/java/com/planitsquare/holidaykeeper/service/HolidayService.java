@@ -108,4 +108,15 @@ public class HolidayService {
         return countyRepository.findByCode(code)
                 .orElseGet(() -> countyRepository.save(new County(code, country)));
     }
+
+    @Transactional
+    public int markHolidaysAsDeletedByYearAndCountry(int year, String countryCode) {
+        Country country = countryRepository.findByCode(countryCode);
+        if (country == null) {
+            throw new IllegalArgumentException("존재하지 않는 국가코드입니다: " + countryCode);
+        }
+        List<Holiday> holidays = holidayRepository.findByYearAndCountry(year, country);
+        holidays.forEach(Holiday::markAsDeleted);
+        return holidays.size();
+    }
 }
