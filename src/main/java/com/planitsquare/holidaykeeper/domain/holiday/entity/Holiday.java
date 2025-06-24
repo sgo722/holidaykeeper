@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import static jakarta.persistence.CascadeType.ALL;
 
-
 @Entity
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"country_id", "date", "localName"})

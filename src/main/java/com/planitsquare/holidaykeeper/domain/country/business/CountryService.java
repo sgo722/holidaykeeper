@@ -3,7 +3,6 @@ package com.planitsquare.holidaykeeper.domain.country.business;
 import com.planitsquare.holidaykeeper.domain.country.business.response.CountryServiceResponse;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
 import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

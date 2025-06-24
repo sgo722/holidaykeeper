@@ -2,7 +2,6 @@ package com.planitsquare.holidaykeeper.domain.country.presentation;
 
 import com.planitsquare.holidaykeeper.domain.country.business.CountryService;
 import com.planitsquare.holidaykeeper.domain.country.presentation.response.CountryControllerResponse;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
