@@ -23,4 +23,18 @@ public class Country extends BaseEntity {
         this.code = code;
         this.name = name;
     }
+
+    /**
+     * 이름이 다르면 true, 같으면 false 반환
+     */
+    public boolean shouldUpdateName(String newName) {
+        return !this.name.equals(newName);
+    }
+
+    /**
+     * 이름을 변경
+     */
+    public void updateName(String newName) {
+        this.name = newName;
+    }
 }

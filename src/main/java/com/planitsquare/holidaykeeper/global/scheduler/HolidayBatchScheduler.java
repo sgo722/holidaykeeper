@@ -2,8 +2,8 @@ package com.planitsquare.holidaykeeper.global.scheduler;
 
 import com.planitsquare.holidaykeeper.domain.dto.CountryResponse;
 import com.planitsquare.holidaykeeper.domain.model.Country;
-import com.planitsquare.holidaykeeper.domain.repository.CountryRepository;
 import com.planitsquare.holidaykeeper.infrastructure.api.NagerApiClient;
+import com.planitsquare.holidaykeeper.service.CountryService;
 import com.planitsquare.holidaykeeper.service.HolidayService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.util.List;
 public class HolidayBatchScheduler {
 
     private final HolidayService holidayService;
-    private final CountryRepository countryRepository;
+    private final CountryService countryService;
     private final NagerApiClient nagerApiClient;
 
     @Scheduled(cron = "0 0 1 2 1 *", zone = "Asia/Seoul")
@@ -36,11 +36,8 @@ public class HolidayBatchScheduler {
             String code = countryResponse.countryCode();
             String name = countryResponse.name();
 
-            Country country = countryRepository.findByCode(code);
-            if (country == null) {
-                countryRepository.save(new Country(code, name));
-                log.info("신규 국가 추가: {} ({})", name, code);
-            }
+            countryService.upsertCountry(code, name);
+
             log.info("⏳ {}년 {}({}) 공휴일 동기화 시작", currentYear, name, code);
             holidayService.upsertHolidays(currentYear, code);
             log.info("⏳ {}년 {}({}) 공휴일 동기화 시작", prevYear, name, code);
