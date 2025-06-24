@@ -1,10 +1,14 @@
 package com.planitsquare.holidaykeeper.domain.country.business;
 
+import com.planitsquare.holidaykeeper.domain.country.business.response.CountryServiceResponse;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
 import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +36,11 @@ public class CountryService {
             throw new IllegalArgumentException("존재하지 않는 국가코드입니다: " + code);
         }
         return country;
+    }
+
+    public List<CountryServiceResponse> getAllCountries() {
+        return countryRepository.findAll().stream()
+            .map(CountryServiceResponse::from)
+            .toList();
     }
 }
