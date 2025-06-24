@@ -9,8 +9,8 @@ import java.time.Year;
 
 public record HolidaySearchRequest(
         String country,
-        @Min(1900) Integer fromYear,
-        @Max(2100) Integer toYear,
+        @Min(value = 1900, message = "시작 년도는 1900년 이상이어야 합니다.") Integer fromYear,
+        @Max(value = 2100, message = "종료 연도는 2100년 이하여야 합니다.") Integer toYear,
         Boolean global,
         HolidayType type) {
 

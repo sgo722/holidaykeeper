@@ -6,6 +6,7 @@ import com.planitsquare.holidaykeeper.domain.holiday.presentation.request.Holida
 import com.planitsquare.holidaykeeper.domain.holiday.presentation.response.HolidayResponse;
 import com.planitsquare.holidaykeeper.domain.holiday.business.HolidayService;
 import com.planitsquare.holidaykeeper.domain.holiday.business.request.HolidayUpsertServiceRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +21,12 @@ public class HolidayController {
     private final HolidayService holidayService;
 
     @GetMapping
-    public ResponseEntity<Page<HolidayResponse>> searchHolidays(HolidaySearchRequest holidaySearchRequest, Pageable pageable) {
+    public ResponseEntity<Page<HolidayResponse>> searchHolidays(@Valid HolidaySearchRequest holidaySearchRequest, Pageable pageable) {
         return ResponseEntity.ok(holidayService.search(holidaySearchRequest.toCondition(), pageable));
     }
 
     @PostMapping
-    public ResponseEntity<String> upsertHolidays(@RequestBody HolidayUpsertRequest holidayUpsertRequest){
+    public ResponseEntity<String> upsertHolidays(@RequestBody @Valid HolidayUpsertRequest holidayUpsertRequest){
         HolidayUpsertServiceRequest serviceRequest = holidayUpsertRequest.toService();
         holidayService.upsertHolidays(serviceRequest.year(), serviceRequest.countryCode());
         return ResponseEntity.ok("Upsert 완료");
