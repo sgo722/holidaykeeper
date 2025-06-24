@@ -1,5 +1,9 @@
 package com.planitsquare.holidaykeeper.global.response;
 
+
+import lombok.Getter;
+
+@Getter
 public class ErrorResponse {
     private final String message;
     private final int status;
@@ -9,11 +13,4 @@ public class ErrorResponse {
         this.status = status;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public int getStatus() {
-        return status;
-    }
 }
