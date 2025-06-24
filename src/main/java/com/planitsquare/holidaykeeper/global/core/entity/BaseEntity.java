@@ -1,4 +1,4 @@
-package com.planitsquare.holidaykeeper.global.core;
+package com.planitsquare.holidaykeeper.global.core.entity;
 
 
 import jakarta.persistence.Column;

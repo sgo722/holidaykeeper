@@ -1,6 +1,6 @@
 package com.planitsquare.holidaykeeper.domain.model;
 
-import com.planitsquare.holidaykeeper.global.core.BaseEntity;
+import com.planitsquare.holidaykeeper.global.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
