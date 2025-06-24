@@ -29,9 +29,9 @@ public class HolidayService {
     private final HolidayQueryRepository holidayQueryRepository;
     private final NagerApiClient nagerApiClient;
     private final HolidayRepository holidayRepository;
-    private final CountryRepository countryRepository;
     private final CountyRepository countyRepository;
     private final DeleteCandidateRepository deleteCandidateRepository;
+    private final CountryService countryService;
 
     @Transactional(readOnly = true)
     public Page<HolidayResponse> search(HolidaySearchCondition condition, Pageable pageable) {
@@ -42,10 +42,7 @@ public class HolidayService {
 
     @Transactional
     public void upsertHolidays(int year, String countryCode) {
-        Country findCountry = countryRepository.findByCode(countryCode);
-        if (findCountry == null) {
-            throw new IllegalArgumentException("[ERROR] 해당 나라코드 지원하지 않습니다");
-        }
+        Country findCountry = countryService.getCountryOrThrow(countryCode);
 
         List<Holiday> existing = holidayRepository.findByYearAndCountry(year, findCountry);
         List<PublicHolidayResponse> fetched = nagerApiClient.getPublicHolidays(countryCode, year);
@@ -111,10 +108,7 @@ public class HolidayService {
 
     @Transactional
     public int markHolidaysAsDeletedByYearAndCountry(int year, String countryCode) {
-        Country country = countryRepository.findByCode(countryCode);
-        if (country == null) {
-            throw new IllegalArgumentException("존재하지 않는 국가코드입니다: " + countryCode);
-        }
+        Country country = countryService.getCountryOrThrow(countryCode);
         List<Holiday> holidays = holidayRepository.findByYearAndCountry(year, country);
         holidays.forEach(Holiday::markAsDeleted);
         return holidays.size();

@@ -24,4 +24,13 @@ public class CountryService {
             countryRepository.save(country);
         }
     }
+
+    @Transactional(readOnly = true)
+    public Country getCountryOrThrow(String code) {
+        Country country = countryRepository.findByCode(code);
+        if (country == null) {
+            throw new IllegalArgumentException("존재하지 않는 국가코드입니다: " + code);
+        }
+        return country;
+    }
 }
