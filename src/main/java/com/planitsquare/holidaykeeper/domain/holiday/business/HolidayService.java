@@ -14,11 +14,15 @@ import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.H
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.DeleteHolidayCandidateRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.NagerApiClient;
 import com.planitsquare.holidaykeeper.domain.holiday.business.request.HolidaySearchCondition;
+import com.planitsquare.holidaykeeper.domain.holiday.business.request.HolidayUpsertServiceRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class HolidayService {
 
     private final HolidayQueryRepository holidayQueryRepository;
@@ -37,18 +42,18 @@ public class HolidayService {
     private final CountryService countryService;
 
     @Transactional(readOnly = true)
-    public Page<HolidayResponse> search(HolidaySearchCondition condition, Pageable pageable) {
+    public Page<HolidayResponse> search(@Valid HolidaySearchCondition condition, Pageable pageable) {
         return holidayQueryRepository.search(condition, pageable)
                 .map(HolidayResponse::from);
     }
 
 
     @Transactional
-    public void upsertHolidays(int year, String countryCode) {
-        Country findCountry = countryService.getCountryOrThrow(countryCode);
+    public void upsertHolidays(@Valid HolidayUpsertServiceRequest request) {
+        Country findCountry = countryService.getCountryOrThrow(request.countryCode());
 
-        List<Holiday> existing = holidayRepository.findByYearAndCountry(year, findCountry);
-        List<PublicHolidayResponse> fetched = nagerApiClient.getPublicHolidays(countryCode, year);
+        List<Holiday> existing = holidayRepository.findByYearAndCountry(request.year(), findCountry);
+        List<PublicHolidayResponse> fetched = nagerApiClient.getPublicHolidays(request.countryCode(), request.year());
 
         for (PublicHolidayResponse newData : fetched) {
             Optional<Holiday> maybeHoliday = existing.stream()
@@ -102,6 +107,12 @@ public class HolidayService {
                 deleteHolidayCandidateRepository.save(DeleteHolidayCandidate.from(oldData));
             }
         }
+    }
+
+    // 기존 메서드 호환성을 위한 오버로드
+    @Transactional
+    public void upsertHolidays(int year, String countryCode) {
+        upsertHolidays(new HolidayUpsertServiceRequest(year, countryCode));
     }
 
     private County findOrCreateCounty(String code, Country country) {
