@@ -1,15 +1,20 @@
 package com.planitsquare.holidaykeeper.domain.country.business;
 
+import com.planitsquare.holidaykeeper.domain.country.business.response.CountryServiceResponse;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
 import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,5 +64,23 @@ class CountryServiceTest {
         countryService.upsertCountry("KR", "대한민국");
         // then
         verify(countryRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("서비스에서 국가 전체 목록을 반환한다")
+    void getAllCountries() {
+        // given
+        List<Country> countries = List.of(
+                new Country("KR", "대한민국"),
+                new Country("US", "미국"),
+                new Country("JP", "일본")
+        );
+        when(countryRepository.findAll()).thenReturn(countries);
+
+        // when
+        List<CountryServiceResponse> allCountries = countryService.getAllCountries();
+
+        // then
+        assertThat(allCountries.size()).isEqualTo(3);
     }
 }

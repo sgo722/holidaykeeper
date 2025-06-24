@@ -1,8 +1,6 @@
 package com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository;
 
-import com.planitsquare.holidaykeeper.domain.model.*;
-import com.planitsquare.holidaykeeper.domain.holiday.entity.Holiday;
-import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
+import com.planitsquare.holidaykeeper.domain.holiday.entity.*;
 import com.planitsquare.holidaykeeper.domain.holiday.business.request.HolidaySearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
