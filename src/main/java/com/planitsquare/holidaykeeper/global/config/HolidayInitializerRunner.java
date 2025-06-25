@@ -51,7 +51,6 @@ public class HolidayInitializerRunner implements ApplicationRunner {
         log.info("국가 정보 적재 완료");
     }
 
-
     private void syncPublicHolidays() {
         try {
             List<Country> countries = countryRepository.findAll();
@@ -92,12 +91,14 @@ public class HolidayInitializerRunner implements ApplicationRunner {
                                 .build();
                         holidayCandidates.add(holiday);
                     }
+
                     // DB에서 해당 국가/연도에 이미 존재하는 (date, local_name)만 조회
                     List<Holiday> existing = holidayRepository.findByYearAndCountry(year, country);
                     java.util.Set<String> existingKeySet = existing.stream()
                             .map(h -> h.getDate() + "::" + h.getLocalName())
                             .collect(java.util.stream.Collectors.toSet());
-//                     메모리 내에서도 (date, local_name) 기준 중복 제거
+
+//                  메모리 내에서도 (date, local_name) 기준 중복 제거
                     java.util.Map<String, Holiday> uniqueMap = new java.util.LinkedHashMap<>();
                     for (Holiday h : holidayCandidates) {
                         String key = h.getDate() + "::" + h.getLocalName();
@@ -105,11 +106,11 @@ public class HolidayInitializerRunner implements ApplicationRunner {
                             uniqueMap.putIfAbsent(key, h);
                         }
                     }
+
                     List<Holiday> toInsert = new java.util.ArrayList<>(uniqueMap.values());
                     if (!toInsert.isEmpty()) {
                         try {
                             holidayBulkJdbcRepository.bulkInsert(toInsert);
-                            log.info("{}년 {}({}) 신규 공휴일 {}건 batch insert(JdbcTemplate) 완료", year, country.getName(), countryCode, toInsert.size());
                         } catch (Exception e) {
                             log.error("holiday 테이블 batch insert 실패: {}", e.getMessage());
                         }
