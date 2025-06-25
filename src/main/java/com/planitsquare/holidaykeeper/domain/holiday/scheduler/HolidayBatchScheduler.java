@@ -27,7 +27,7 @@ public class HolidayBatchScheduler {
         int currentYear = Year.now().getValue();
         int prevYear = currentYear - 1;
 
-        log.info("✅ {}년, {}년 모든 외부 API 국가 공휴일 동기화 시작", prevYear, currentYear);
+        log.info("{}년, {}년 모든 외부 API 국가 공휴일 동기화 시작", prevYear, currentYear);
 
         List<CountryNagerResponse> countries = nagerApiClient.getAvailableCountries();
 
@@ -37,11 +37,11 @@ public class HolidayBatchScheduler {
 
             countryService.upsertCountry(code, name);
 
-            log.info("⏳ {}년 {}({}) 공휴일 동기화 시작", currentYear, name, code);
+            log.info("{}년 {}({}) 공휴일 동기화 시작", currentYear, name, code);
             holidayService.upsertHolidays(currentYear, code);
-            log.info("⏳ {}년 {}({}) 공휴일 동기화 시작", prevYear, name, code);
+            log.info("{}년 {}({}) 공휴일 동기화 시작", prevYear, name, code);
             holidayService.upsertHolidays(prevYear, code);
         }
-        log.info("✅ {}년, {}년 모든 외부 API 국가 공휴일 동기화 완료", prevYear, currentYear);
+        log.info("{}년, {}년 모든 외부 API 국가 공휴일 동기화 완료", prevYear, currentYear);
     }
 }

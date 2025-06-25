@@ -20,9 +20,6 @@ import java.util.function.Supplier;
 import static jakarta.persistence.CascadeType.ALL;
 
 @Entity
-@Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"country_id", "date", "localName"})
-)
 @NoArgsConstructor
 @Getter
 public class Holiday extends BaseEntity {
