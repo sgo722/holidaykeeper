@@ -70,7 +70,12 @@
 ## 리팩토링 대상 정리
 [x] restClient 에러 핸들링  
 [x] Country / Holiday 패키지 분리하기  
-[ ] 기간별 조회할 떄 단위가 연도가 아니라 날짜별로 조회 가능하도록 구현하기
 [x] 전역 에러 핸들링 구현하기
 [x] Controller Request 데이터 검증하기
-[ ] Service Request 데이터 검증하기 
+
+## 할 일 정리
+[ ] 처음 데이터 배치처리 + 서비스로 책임분리
+[ ] holidayservice 메서드 분리
+[ ] scheduler 매일 새벽 3시
+[ ] 깃헙 ci 먼들기
+[ ] 문서화 후 제출
