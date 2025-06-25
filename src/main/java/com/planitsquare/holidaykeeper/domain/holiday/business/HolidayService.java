@@ -2,6 +2,7 @@ package com.planitsquare.holidaykeeper.domain.holiday.business;
 
 import com.planitsquare.holidaykeeper.domain.country.business.CountryService;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
+import com.planitsquare.holidaykeeper.domain.holiday.business.request.HolidaySaveServiceRequest;
 import com.planitsquare.holidaykeeper.domain.holiday.entity.County;
 import com.planitsquare.holidaykeeper.domain.holiday.entity.DeleteHolidayCandidate;
 import com.planitsquare.holidaykeeper.domain.holiday.entity.Holiday;
@@ -27,7 +28,6 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -63,61 +63,71 @@ public class HolidayService {
         upsertHolidays(new HolidayUpsertServiceRequest(year, countryCode));
     }
 
-
     @Transactional
     public void upsertHolidays(@Valid HolidayUpsertServiceRequest request) {
-        Country findCountry = countryService.getCountryOrThrow(request.countryCode());
+        Country country = countryService.getCountryOrThrow(request.countryCode());
+        List<Holiday> existingHolidays = holidayRepository.findByYearAndCountry(request.year(), country);
+        List<HolidayNagerResponse> apiHolidayResponses = nagerApiClient.getPublicHolidays(request.countryCode(), request.year());
 
-        List<Holiday> existing = holidayRepository.findByYearAndCountry(request.year(), findCountry);
-        List<HolidayNagerResponse> fetched = nagerApiClient.getPublicHolidays(request.countryCode(), request.year());
+        // 1. API 데이터 → 내부 DTO로 변환
+        List<HolidaySaveServiceRequest> holidaySaveRequests = apiHolidayResponses.stream()
+            .map(apiResponse -> apiResponse.toService(country))
+            .toList();
 
-        for (HolidayNagerResponse newData : fetched) {
-            Optional<Holiday> maybeHoliday = existing.stream()
-                    .filter(e -> e.getDate().equals(newData.date()))
-                    .findFirst();
+        // 2. Holiday upsert 처리
+        for (HolidaySaveServiceRequest saveRequest : holidaySaveRequests) {
+            Optional<Holiday> existingHolidayOpt = findExistingHoliday(existingHolidays, saveRequest.date());
+            List<County> holidayCounties = convertCounties(saveRequest.countyCodes(), country);
 
-            List<County> counties = Optional.ofNullable(newData.countyCodes())
-                .orElse(List.of())
-                .stream()
-                .map(code -> findOrCreateCounty(code, findCountry))
-                .collect(Collectors.toList());
-
-            Set<HolidayType> updateTypes = newData.types().stream()
-                .map(HolidayType::from)
-                .collect(Collectors.toSet());
-
-            if (maybeHoliday.isPresent()) {
-                Holiday holiday = maybeHoliday.get();
-                boolean changed = holiday.updateIfChanged(
-                    newData.name(),
-                    newData.localName(),
-                    newData.global(),
-                    updateTypes,
-                    counties
-                );
-                if (changed) {
-                    holidayRepository.save(holiday);
-                }
+            if (existingHolidayOpt.isPresent()) {
+                updateHolidayIfChanged(existingHolidayOpt.get(), saveRequest, holidayCounties);
             } else {
-                Holiday newHoliday = Holiday.of(
-                    findCountry,
-                    newData.date(),
-                    newData.localName(),
-                    newData.name(),
-                    newData.fixed(),
-                    newData.global(),
-                    newData.launchYear(),
-                    updateTypes,
-                    counties
-                );
-                holidayRepository.save(newHoliday);
+                createAndSaveHoliday(saveRequest, holidayCounties);
             }
         }
 
-        Set<LocalDate> apiDates = fetched.stream()
-                .map(HolidayNagerResponse::date)
-                .collect(Collectors.toSet());
+        // 3. 삭제 후보 처리
+        markDeletedHolidays(existingHolidays, holidaySaveRequests);
+    }
 
+    private Optional<Holiday> findExistingHoliday(List<Holiday> existingHolidays, LocalDate date) {
+        return existingHolidays.stream().filter(holiday -> holiday.getDate().equals(date)).findFirst();
+    }
+
+    private List<County> convertCounties(List<String> CountyCodes, Country country) {
+        return CountyCodes.stream().map(countyCode -> findOrCreateCounty(countyCode, country)).toList();
+    }
+
+    private void updateHolidayIfChanged(Holiday holiday, HolidaySaveServiceRequest req, List<County> counties) {
+        boolean changed = holiday.updateIfChanged(
+            req.name(),
+            req.localName(),
+            req.global(),
+            req.types(),
+            counties
+        );
+        if (changed) {
+            holidayRepository.save(holiday);
+        }
+    }
+
+    private void createAndSaveHoliday(HolidaySaveServiceRequest req, List<County> counties) {
+        Holiday newHoliday = Holiday.of(
+            req.country(),
+            req.date(),
+            req.localName(),
+            req.name(),
+            req.fixed(),
+            req.global(),
+            req.launchYear(),
+            req.types(),
+            counties
+        );
+        holidayRepository.save(newHoliday);
+    }
+
+    private void markDeletedHolidays(List<Holiday> existing, List<HolidaySaveServiceRequest> saveRequests) {
+        Set<LocalDate> apiDates = saveRequests.stream().map(HolidaySaveServiceRequest::date).collect(Collectors.toSet());
         for (Holiday oldData : existing) {
             if (!apiDates.contains(oldData.getDate())) {
                 deleteHolidayCandidateRepository.save(DeleteHolidayCandidate.from(oldData));
