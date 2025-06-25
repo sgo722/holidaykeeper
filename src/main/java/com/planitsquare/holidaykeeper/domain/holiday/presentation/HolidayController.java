@@ -89,7 +89,7 @@ public class HolidayController {
                 content = @Content(schema = @Schema(implementation = com.planitsquare.holidaykeeper.global.response.ErrorResponse.class)))
         }
     )
-    @PatchMapping("/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity<String> markHolidaysAsDeleted(
             @RequestBody HolidayDeleteRequest request
     ) {

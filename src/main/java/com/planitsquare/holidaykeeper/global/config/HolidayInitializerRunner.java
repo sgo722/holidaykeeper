@@ -112,7 +112,6 @@ public class HolidayInitializerRunner implements ApplicationRunner {
                             holidayBulkJdbcRepository.bulkInsert(toInsert);
                             log.info("{}년 {}({}) 신규 공휴일 {}건 batch insert(JdbcTemplate) 완료", year, country.getName(), countryCode, toInsert.size());
                         } catch (Exception e) {
-                            e.printStackTrace();
                             log.error("holiday 테이블 batch insert 실패: {}", e.getMessage());
                         }
                     } else {

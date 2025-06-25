@@ -1,6 +1,5 @@
 package com.planitsquare.holidaykeeper.domain.country.business;
 
-import com.planitsquare.holidaykeeper.domain.country.business.request.CountrySaveServiceRequest;
 import com.planitsquare.holidaykeeper.domain.country.business.response.CountryViewServiceResponse;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
 import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
@@ -15,13 +14,6 @@ import java.util.List;
 public class CountryService {
 
     private final CountryRepository countryRepository;
-
-    @Transactional
-    public void initializeCountries(List<CountrySaveServiceRequest> countryNagerRespons) {
-        for (CountrySaveServiceRequest request : countryNagerRespons) {
-            upsertCountry(request.countryCode(), request.name());
-        }
-    }
 
     @Transactional
     public void upsertCountry(String code, String name) {
