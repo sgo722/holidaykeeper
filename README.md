@@ -74,7 +74,7 @@
 [x] Controller Request 데이터 검증하기
 
 ## 할 일 정리
-[ ] 처음 데이터 배치처리 + 서비스로 책임분리
+[x] 처음 데이터 배치처리 + 서비스로 책임분리
 [ ] holidayservice 메서드 분리
 [ ] scheduler 매일 새벽 3시
 [ ] 깃헙 ci 먼들기

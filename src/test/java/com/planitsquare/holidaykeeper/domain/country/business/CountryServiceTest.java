@@ -1,6 +1,6 @@
 package com.planitsquare.holidaykeeper.domain.country.business;
 
-import com.planitsquare.holidaykeeper.domain.country.business.response.CountryServiceResponse;
+import com.planitsquare.holidaykeeper.domain.country.business.response.CountryViewServiceResponse;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
 import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -78,7 +78,7 @@ class CountryServiceTest {
         when(countryRepository.findAll()).thenReturn(countries);
 
         // when
-        List<CountryServiceResponse> allCountries = countryService.getAllCountries();
+        List<CountryViewServiceResponse> allCountries = countryService.getAllCountries();
 
         // then
         assertThat(allCountries.size()).isEqualTo(3);

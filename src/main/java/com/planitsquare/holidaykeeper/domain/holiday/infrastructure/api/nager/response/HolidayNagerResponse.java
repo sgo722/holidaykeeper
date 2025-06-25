@@ -3,7 +3,7 @@ package com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.r
 import java.time.LocalDate;
 import java.util.List;
 
-public record PublicHolidayResponse(
+public record HolidayNagerResponse(
         LocalDate date,
         String localName,
         String name,
@@ -12,4 +12,5 @@ public record PublicHolidayResponse(
         List<String> countyCodes,
         Integer launchYear,
         List<String> types
-) {}
+) {
+}

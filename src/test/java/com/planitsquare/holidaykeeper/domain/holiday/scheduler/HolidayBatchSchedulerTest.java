@@ -1,7 +1,7 @@
 package com.planitsquare.holidaykeeper.domain.holiday.scheduler;
 
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryNagerResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.HolidayNagerResponse;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
 import com.planitsquare.holidaykeeper.domain.holiday.entity.Holiday;
 import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
@@ -39,15 +39,15 @@ class HolidayBatchSchedulerTest {
 
     int currentYear;
     int prevYear;
-    CountryResponse kr;
-    CountryResponse us;
+    CountryNagerResponse kr;
+    CountryNagerResponse us;
 
     @BeforeEach
     void setUp() {
         currentYear = java.time.Year.now().getValue();
         prevYear = currentYear - 1;
-        kr = new CountryResponse("KR", "대한민국");
-        us = new CountryResponse("US", "미국");
+        kr = new CountryNagerResponse("KR", "대한민국");
+        us = new CountryNagerResponse("US", "미국");
     }
 
     @Test
@@ -82,7 +82,7 @@ class HolidayBatchSchedulerTest {
         // given
         when(nagerApiClient.getAvailableCountries()).thenReturn(List.of(kr));
         when(nagerApiClient.getPublicHolidays("KR", currentYear)).thenReturn(List.of(
-                new PublicHolidayResponse(
+                new HolidayNagerResponse(
                         LocalDate.of(currentYear, 1, 1), "신정", "New Year's Day", true, true, List.of(), 1949, List.of("PUBLIC")
                 )
         ));
@@ -100,12 +100,12 @@ class HolidayBatchSchedulerTest {
         // given
         when(nagerApiClient.getAvailableCountries()).thenReturn(List.of(kr));
         when(nagerApiClient.getPublicHolidays("KR", currentYear)).thenReturn(List.of(
-                new PublicHolidayResponse(
+                new HolidayNagerResponse(
                         LocalDate.of(currentYear, 1, 1), "신정", "New Year's Day", true, true, List.of(), 1949, List.of("PUBLIC")
                 )
         ));
         when(nagerApiClient.getPublicHolidays("KR", prevYear)).thenReturn(List.of(
-                new PublicHolidayResponse(
+                new HolidayNagerResponse(
                         LocalDate.of(prevYear, 3, 1), "삼일절", "Independence Movement Day", true, true, List.of(), 1946, List.of("PUBLIC")
                 )
         ));
@@ -135,7 +135,7 @@ class HolidayBatchSchedulerTest {
                 .build());
         when(nagerApiClient.getAvailableCountries()).thenReturn(List.of(kr));
         when(nagerApiClient.getPublicHolidays("KR", currentYear)).thenReturn(List.of(
-                new PublicHolidayResponse(
+                new HolidayNagerResponse(
                         LocalDate.of(currentYear, 1, 1), "신정", "새이름", true, true, List.of(), 1949, List.of("PUBLIC")
                 )
         ));
@@ -152,7 +152,7 @@ class HolidayBatchSchedulerTest {
     void countryIsUpdatedFromExternalApi() {
         // given: DB에 이미 저장된 Country가 있고, 외부 API에서 같은 코드의 Country가 다른 이름으로 내려옴
         countryRepository.save(new Country("KR", "Old Name"));
-        CountryResponse krNew = new CountryResponse("KR", "New Name");
+        CountryNagerResponse krNew = new CountryNagerResponse("KR", "New Name");
         when(nagerApiClient.getAvailableCountries()).thenReturn(List.of(krNew));
         when(nagerApiClient.getPublicHolidays(anyString(), anyInt())).thenReturn(List.of());
         // when

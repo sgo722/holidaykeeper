@@ -7,7 +7,7 @@ import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.C
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.DeleteHolidayCandidateRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.HolidayRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.NagerApiClient;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.HolidayNagerResponse;
 import com.planitsquare.holidaykeeper.domain.holiday.business.request.HolidaySearchCondition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -211,7 +211,7 @@ class HolidayServiceTest {
     @DisplayName("신규 공휴일이 정상적으로 DB에 저장된다")
     void insertNewHoliday() {
         // given
-        PublicHolidayResponse apiHoliday = new PublicHolidayResponse(
+        HolidayNagerResponse apiHoliday = new HolidayNagerResponse(
                 LocalDate.of(2025, 1, 1),
                 "신정",
                 "New Year's Day",
@@ -253,7 +253,7 @@ class HolidayServiceTest {
         );
         holidayRepository.save(holiday);
 
-        PublicHolidayResponse apiHoliday = new PublicHolidayResponse(
+        HolidayNagerResponse apiHoliday = new HolidayNagerResponse(
                 LocalDate.of(2025, 1, 1),
                 "신정",
                 "New Year's Day",

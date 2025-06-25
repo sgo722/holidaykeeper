@@ -1,7 +1,7 @@
 package com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager;
 
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryNagerResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.HolidayNagerResponse;
 import com.planitsquare.holidaykeeper.global.exception.NagerApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class NagerApiClientImpl implements NagerApiClient {
     private final RestClient restClient;
 
     @Override
-    public List<CountryResponse> getAvailableCountries() {
+    public List<CountryNagerResponse> getAvailableCountries() {
         try {
             return restClient.get()
                     .uri(GET_COUNTRIES_URI)
@@ -35,7 +35,7 @@ public class NagerApiClientImpl implements NagerApiClient {
     }
 
     @Override
-    public List<PublicHolidayResponse> getPublicHolidays(String countryCode, int year) {
+    public List<HolidayNagerResponse> getPublicHolidays(String countryCode, int year) {
         try {
             return restClient.get()
                     .uri(GET_HOLIDAY_URI, year, countryCode)

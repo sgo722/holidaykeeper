@@ -7,7 +7,7 @@ import com.planitsquare.holidaykeeper.domain.holiday.entity.DeleteHolidayCandida
 import com.planitsquare.holidaykeeper.domain.holiday.entity.Holiday;
 import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
 import com.planitsquare.holidaykeeper.domain.holiday.presentation.response.HolidayResponse;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.HolidayNagerResponse;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.CountyRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.HolidayQueryRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.HolidayRepository;
@@ -42,9 +42,25 @@ public class HolidayService {
     private final CountryService countryService;
 
     @Transactional(readOnly = true)
-    public Page<HolidayResponse> search(@Valid HolidaySearchCondition condition, Pageable pageable) {
-        return holidayQueryRepository.search(condition, pageable)
-                .map(HolidayResponse::from);
+    public boolean isAlreadyInitialized(int fromYear, int toYear) {
+        return holidayRepository.existsByDateBetween(
+                LocalDate.of(fromYear, 1, 1),
+                LocalDate.of(toYear, 12, 31)
+        );
+    }
+
+    @Transactional
+    public void initializeHolidays(List<Country> countries, int fromYear, int toYear) {
+        for (Country country : countries) {
+            for (int year = fromYear; year <= toYear; year++) {
+                upsertHolidays(year, country.getCode());
+            }
+        }
+    }
+
+    @Transactional
+    public void upsertHolidays(int year, String countryCode) {
+        upsertHolidays(new HolidayUpsertServiceRequest(year, countryCode));
     }
 
 
@@ -53,9 +69,9 @@ public class HolidayService {
         Country findCountry = countryService.getCountryOrThrow(request.countryCode());
 
         List<Holiday> existing = holidayRepository.findByYearAndCountry(request.year(), findCountry);
-        List<PublicHolidayResponse> fetched = nagerApiClient.getPublicHolidays(request.countryCode(), request.year());
+        List<HolidayNagerResponse> fetched = nagerApiClient.getPublicHolidays(request.countryCode(), request.year());
 
-        for (PublicHolidayResponse newData : fetched) {
+        for (HolidayNagerResponse newData : fetched) {
             Optional<Holiday> maybeHoliday = existing.stream()
                     .filter(e -> e.getDate().equals(newData.date()))
                     .findFirst();
@@ -99,7 +115,7 @@ public class HolidayService {
         }
 
         Set<LocalDate> apiDates = fetched.stream()
-                .map(PublicHolidayResponse::date)
+                .map(HolidayNagerResponse::date)
                 .collect(Collectors.toSet());
 
         for (Holiday oldData : existing) {
@@ -109,10 +125,10 @@ public class HolidayService {
         }
     }
 
-    // 기존 메서드 호환성을 위한 오버로드
-    @Transactional
-    public void upsertHolidays(int year, String countryCode) {
-        upsertHolidays(new HolidayUpsertServiceRequest(year, countryCode));
+    @Transactional(readOnly = true)
+    public Page<HolidayResponse> search(@Valid HolidaySearchCondition condition, Pageable pageable) {
+        return holidayQueryRepository.search(condition, pageable)
+                .map(HolidayResponse::from);
     }
 
     private County findOrCreateCounty(String code, Country country) {

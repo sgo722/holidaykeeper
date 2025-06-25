@@ -1,6 +1,6 @@
 package com.planitsquare.holidaykeeper.domain.holiday.scheduler;
 
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryNagerResponse;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.NagerApiClient;
 import com.planitsquare.holidaykeeper.domain.country.business.CountryService;
 import com.planitsquare.holidaykeeper.domain.holiday.business.HolidayService;
@@ -29,11 +29,11 @@ public class HolidayBatchScheduler {
 
         log.info("✅ {}년, {}년 모든 외부 API 국가 공휴일 동기화 시작", prevYear, currentYear);
 
-        List<CountryResponse> countries = nagerApiClient.getAvailableCountries();
+        List<CountryNagerResponse> countries = nagerApiClient.getAvailableCountries();
 
-        for (CountryResponse countryResponse : countries) {
-            String code = countryResponse.countryCode();
-            String name = countryResponse.name();
+        for (CountryNagerResponse countryNagerResponse : countries) {
+            String code = countryNagerResponse.countryCode();
+            String name = countryNagerResponse.name();
 
             countryService.upsertCountry(code, name);
 

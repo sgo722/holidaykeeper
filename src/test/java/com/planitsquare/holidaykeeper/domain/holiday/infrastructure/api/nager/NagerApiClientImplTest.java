@@ -1,7 +1,7 @@
 package com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager;
 
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryResponse;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.PublicHolidayResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryNagerResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.HolidayNagerResponse;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -79,11 +79,11 @@ class NagerApiClientImplTest {
                 .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE));
 
         // when
-        List<CountryResponse> result = nagerApiClient.getAvailableCountries();
+        List<CountryNagerResponse> result = nagerApiClient.getAvailableCountries();
 
         // then
         assertThat(result).hasSize(2);
-        CountryResponse countries = result.get(0);
+        CountryNagerResponse countries = result.get(0);
         assertThat(countries.countryCode()).isEqualTo("AD");
         assertThat(countries.name()).isEqualTo("Andorra");
     }
@@ -131,11 +131,11 @@ class NagerApiClientImplTest {
                 .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE));
 
         // when
-        List<PublicHolidayResponse> result = nagerApiClient.getPublicHolidays("KR", 2025);
+        List<HolidayNagerResponse> result = nagerApiClient.getPublicHolidays("KR", 2025);
 
         // then
         assertThat(result).hasSize(1);
-        PublicHolidayResponse holiday = result.get(0);
+        HolidayNagerResponse holiday = result.get(0);
         assertThat(holiday.date()).isEqualTo(LocalDate.of(2025, 1, 1));
         assertThat(holiday.name()).isEqualTo("New Year's Day");
         assertThat(holiday.localName()).isEqualTo("새해");

@@ -1,6 +1,7 @@
 package com.planitsquare.holidaykeeper.domain.country.business;
 
-import com.planitsquare.holidaykeeper.domain.country.business.response.CountryServiceResponse;
+import com.planitsquare.holidaykeeper.domain.country.business.request.CountrySaveServiceRequest;
+import com.planitsquare.holidaykeeper.domain.country.business.response.CountryViewServiceResponse;
 import com.planitsquare.holidaykeeper.domain.country.entity.Country;
 import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,9 +38,16 @@ public class CountryService {
         return country;
     }
 
-    public List<CountryServiceResponse> getAllCountries() {
+    public List<CountryViewServiceResponse> getAllCountries() {
         return countryRepository.findAll().stream()
-            .map(CountryServiceResponse::from)
+            .map(CountryViewServiceResponse::from)
             .toList();
+    }
+
+    @Transactional
+    public void initializeCountries(List<CountrySaveServiceRequest> countryNagerRespons) {
+        for (CountrySaveServiceRequest request : countryNagerRespons) {
+            upsertCountry(request.countryCode(), request.name());
+        }
     }
 }
