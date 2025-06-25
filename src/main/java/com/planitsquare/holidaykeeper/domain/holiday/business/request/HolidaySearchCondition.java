@@ -3,7 +3,6 @@ package com.planitsquare.holidaykeeper.domain.holiday.business.request;
 import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 
 public record HolidaySearchCondition(
         String countryCode,

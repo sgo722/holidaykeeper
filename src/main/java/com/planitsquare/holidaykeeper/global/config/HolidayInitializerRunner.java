@@ -7,7 +7,6 @@ import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.NagerApiClient;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryNagerResponse;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.HolidayNagerResponse;
-import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.CountyRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.HolidayBulkJdbcRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.HolidayRepository;
 import lombok.RequiredArgsConstructor;

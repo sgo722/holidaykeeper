@@ -1,6 +1,5 @@
 package com.planitsquare.holidaykeeper.global.response;
 
-
 import lombok.Getter;
 
 @Getter
