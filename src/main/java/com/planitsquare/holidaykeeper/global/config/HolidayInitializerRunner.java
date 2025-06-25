@@ -1,59 +1,126 @@
 package com.planitsquare.holidaykeeper.global.config;
 
-import com.planitsquare.holidaykeeper.domain.country.business.CountryService;
-import com.planitsquare.holidaykeeper.domain.country.business.request.CountrySaveServiceRequest;
-import com.planitsquare.holidaykeeper.domain.country.business.response.CountryViewServiceResponse;
-import com.planitsquare.holidaykeeper.domain.country.entity.Country;
-import com.planitsquare.holidaykeeper.domain.holiday.business.HolidayService;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.CountryNagerResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.response.HolidayNagerResponse;
+import com.planitsquare.holidaykeeper.domain.holiday.entity.County;
+import com.planitsquare.holidaykeeper.domain.country.entity.Country;
+import com.planitsquare.holidaykeeper.domain.holiday.entity.Holiday;
+import com.planitsquare.holidaykeeper.domain.holiday.entity.HolidayType;
 import com.planitsquare.holidaykeeper.domain.country.repository.CountryRepository;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.HolidayRepository;
+import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.repository.CountyRepository;
 import com.planitsquare.holidaykeeper.domain.holiday.infrastructure.api.nager.NagerApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
-@Profile("!test") // 이 줄을 추가!
 @RequiredArgsConstructor
 public class HolidayInitializerRunner implements ApplicationRunner {
 
     private final CountryRepository countryRepository;
     private final NagerApiClient nagerApiClient;
-    private final CountryService countryService;
-    private final HolidayService holidayService;
+    private final HolidayRepository holidayRepository;
+    private final CountyRepository countyRepository;
 
     @Override
-    public void run(ApplicationArguments args) {
-        List<CountrySaveServiceRequest> CountrySaveServiceRequests = nagerApiClient.getAvailableCountries()
-                .stream()
-                .map(CountryNagerResponse::toService)
-                .toList();
+    public void run(ApplicationArguments args){
+        synCountries(); // 나라 목록 먼저 동기화
+        syncPublicHolidays();
+    }
+
+    private void synCountries(){
+        log.info("⏳ 국가 정보 초기 적재 시작");
+        List<CountryNagerResponse> countries = nagerApiClient.getAvailableCountries();
+        countries.forEach(countryResponse -> {
+            if (!countryRepository.existsByCode(countryResponse.countryCode())) {
+                countryRepository.save(new Country(
+                        countryResponse.countryCode(),
+                        countryResponse.name()
+                ));
+            }
+        });
+
+        log.info("✅ 국가 정보 적재 완료");
+    }
 
 
-        log.info("국가 정보 초기 데이터 적재 시작");
-        countryService.initializeCountries(CountrySaveServiceRequests);
-        log.info("국가 정보 초기 데이터 적재 완료");
-
+    private void syncPublicHolidays() {
         List<Country> countries = countryRepository.findAll();
+
         int currentYear = LocalDate.now().getYear();
         int fromYear = currentYear - 5;
         int toYear = currentYear;
 
-
-        log.info("공휴일 정보 초기 데이터 적재 시작");
-        if (!holidayService.isAlreadyInitialized(fromYear, toYear)) {
-            holidayService.initializeHolidays(countries, fromYear, toYear);
-
+        if (isAlreadyInitialized(fromYear, toYear)) {
+            log.info("✅ {}~{}년 공휴일 데이터는 이미 존재합니다. 초기화 생략.", fromYear, toYear);
+            return;
         }
-        log.info("공휴일 정보 초기 데이터 적재 완료");
+
+        log.info("⏳ {}~{}년 공휴일 초기 적재 시작", fromYear, toYear);
+
+
+        for (Country country : countries) {
+            String countryCode = country.getCode();
+
+            for (int year = fromYear; year <= toYear; year++) {
+                List<HolidayNagerResponse> responses = nagerApiClient.getPublicHolidays(countryCode, year);
+
+                for (HolidayNagerResponse response : responses) {
+                    if (holidayRepository.existsByCountryAndDate(country, response.date())) {
+                        continue; // 이미 있으면 skip
+                    }
+
+                    Set<HolidayType> types = new HashSet<>();
+                    if (response.types() != null) {
+                        for (String type : response.types()) {
+                            try {
+                                types.add(HolidayType.from(type.toUpperCase()));
+                            } catch (IllegalArgumentException e) {
+                                // 알 수 없는 타입은 무시하거나 로깅
+                                log.info("타입 삽입하다가 에러 발생");
+                            }
+                        }
+                    }
+
+                    Holiday holiday = Holiday.builder()
+                            .country(country)
+                            .date(response.date())
+                            .localName(response.localName())
+                            .name(response.name())
+                            .fixed(response.fixed())
+                            .global(response.global())
+                            .types(types)
+                            .launchYear(response.launchYear())
+                            .build();
+
+                    if (!response.global() && response.countyCodes() != null) {
+                        List<County> counties = response.countyCodes().stream()
+                                .map(code -> countyRepository.findByCode(code)
+                                        .orElseGet(() -> countyRepository.save(
+                                                new County(code, country))))
+                                .toList();
+                        counties.forEach(holiday::addCounty);
+                    }
+
+                    holidayRepository.save(holiday);
+                }
+            }
+        }
+        log.info("✅ 초기 적재 완료");
     }
-
-
+    private boolean isAlreadyInitialized(int fromYear, int toYear) {
+        return holidayRepository.existsByDateBetween(
+                LocalDate.of(fromYear, 1, 1),
+                LocalDate.of(toYear, 12, 31)
+        );
+    }
 }
