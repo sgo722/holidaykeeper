@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static jakarta.persistence.CascadeType.ALL;
 
@@ -86,41 +88,42 @@ public class Holiday extends BaseEntity {
     }
 
     public boolean updateIfChanged(
-            String name,
-            String localName,
-            boolean global,
-            Set<HolidayType> types,
-            List<County> counties
+            String newName,
+            String newLocalName,
+            boolean newGlobal,
+            Set<HolidayType> newTypes,
+            List<County> newCounties
     ) {
-        boolean changed = false;
-        if (!Objects.equals(this.name, name)) {
-            this.name = name;
-            changed = true;
+        boolean nameChanged = updateFieldIfChanged(() -> this.name, v -> this.name = v, newName);
+        boolean localNameChanged = updateFieldIfChanged(() -> this.localName, v -> this.localName = v, newLocalName);
+        boolean globalChanged = updateFieldIfChanged(() -> this.global, v -> this.global = v, newGlobal);
+        boolean typesChanged = updateFieldIfChanged(() -> this.types, v -> this.types = new HashSet<>(v), newTypes);
+        boolean countiesChanged = updateCountiesIfChanged(newCounties);
+
+        return nameChanged || localNameChanged || globalChanged || typesChanged || countiesChanged;
+    }
+
+    private <T> boolean updateFieldIfChanged(Supplier<T> getter, Consumer<T> setter, T newValue) {
+        if (!Objects.equals(getter.get(), newValue)) {
+            setter.accept(newValue);
+            return true;
         }
-        if (!Objects.equals(this.localName, localName)) {
-            this.localName = localName;
-            changed = true;
-        }
-        if (this.global != global) {
-            this.global = global;
-            changed = true;
-        }
-        if (!Objects.equals(this.types, types)) {
-            this.types = new HashSet<>(types);
-            changed = true;
-        }
-        Set<String> newCountyCodes = counties.stream().map(County::getCode).collect(Collectors.toSet());
+        return false;
+    }
+
+    private boolean updateCountiesIfChanged(List<County> newCounties) {
+        Set<String> newCountyCodes = newCounties.stream().map(County::getCode).collect(Collectors.toSet());
         Set<String> oldCountyCodes = this.counties.stream()
             .map(hc -> hc.getCounty().getCode())
             .collect(Collectors.toSet());
         if (!newCountyCodes.equals(oldCountyCodes)) {
             this.counties.clear();
-            for (County county : counties) {
+            for (County county : newCounties) {
                 this.addCounty(county);
             }
-            changed = true;
+            return true;
         }
-        return changed;
+        return false;
     }
 
     public void addCounty(County county) {

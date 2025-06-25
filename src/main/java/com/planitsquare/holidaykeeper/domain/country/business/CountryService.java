@@ -17,6 +17,13 @@ public class CountryService {
     private final CountryRepository countryRepository;
 
     @Transactional
+    public void initializeCountries(List<CountrySaveServiceRequest> countryNagerRespons) {
+        for (CountrySaveServiceRequest request : countryNagerRespons) {
+            upsertCountry(request.countryCode(), request.name());
+        }
+    }
+
+    @Transactional
     public void upsertCountry(String code, String name) {
         Country country = countryRepository.findByCode(code);
         if (country == null) {
@@ -40,14 +47,7 @@ public class CountryService {
 
     public List<CountryViewServiceResponse> getAllCountries() {
         return countryRepository.findAll().stream()
-            .map(CountryViewServiceResponse::from)
-            .toList();
-    }
-
-    @Transactional
-    public void initializeCountries(List<CountrySaveServiceRequest> countryNagerRespons) {
-        for (CountrySaveServiceRequest request : countryNagerRespons) {
-            upsertCountry(request.countryCode(), request.name());
-        }
+                .map(CountryViewServiceResponse::from)
+                .toList();
     }
 }
