@@ -74,8 +74,7 @@
 [x] Controller Request 데이터 검증하기
 
 ## 할 일 정리
-[x] 처음 데이터 배치처리 + 서비스로 책임분리
 [x] holidayservice 메서드 분리 + 지역변수명 변경
 [x] swagger-ui 적용
 [x] Holiday 클래스 메서드 리팩토링
-[ ] 문서화 후 제출
+[x] 문서화 진행
